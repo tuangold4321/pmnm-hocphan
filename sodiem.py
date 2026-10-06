@@ -101,7 +101,7 @@ def student_detail(mssv):
     Xếp loại: {rank}<br><br>
     BẢNG ĐIỂM TỪNG HỌC PHẦN:<br>
     {score_html}<br><br>
-    <a href="{export_url}">[Tải CSV điểm số]</a><br><br>
+    <a href="{export_url}">Tải bảng điểm (CSV)</a><br><br>
     <a href="{url_for('students')}">Trở về danh sách tổng</a> | <a href="{url_for('index')}">Về trang chủ</a>
     """
 
