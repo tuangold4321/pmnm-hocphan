@@ -58,7 +58,6 @@ def students():
         if not lop_filter or info['lop'].upper() == lop_filter:
             avg, rank = get_avg_and_rank(info['scores'])
             
-            # Đã đổi liên kết dẫn sang /sv/<mssv> để trigger 301 Redirect
             sv_url = url_for('redirect_sv', mssv=mssv)
             
             line = f"MSSV: <a href='{sv_url}'>{mssv}</a> - Họ tên: {info['name']} - Lớp: {info['lop']} - ĐTB: {avg} - Xếp loại: {rank}"
