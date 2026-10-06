@@ -73,12 +73,10 @@ def students():
     <a href="{url_for('search')}">Tìm kiếm sinh viên</a> | <a href="{url_for('index')}">Trở về trang chủ</a>
     """
 
-# --- ROUTE 301 REDIRECT FROM /sv/<mssv> TO /students/<mssv> ---
 @app.route('/sv/<mssv>')
 def redirect_sv(mssv):
     return redirect(url_for('student_detail', mssv=mssv), code=301)
 
-# --- TRANG CHI TIẾT SINH VIÊN ---
 @app.route('/students/<mssv>')
 def student_detail(mssv):
     if mssv not in STUDENTS:
@@ -108,7 +106,6 @@ def student_detail(mssv):
     <a href="{url_for('students')}">Trở về danh sách tổng</a> | <a href="{url_for('index')}">Về trang chủ</a>
     """
 
-# --- ROUTE XUẤT CSV ---
 @app.route('/students/<mssv>/export')
 def export_student_csv(mssv):
     if mssv not in STUDENTS:
