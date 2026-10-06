@@ -31,7 +31,6 @@ def index():
     total_students = len(STUDENTS)
     unique_classes = len(set(s['lop'] for s in STUDENTS.values()))
     
-    # Tạo liên kết bằng url_for
     students_url = url_for('students')
     api_url = url_for('api_students')
     
@@ -45,11 +44,9 @@ def index():
 
 @app.route('/students')
 def students():
-    # Lấy danh sách lớp động từ dữ liệu và sắp xếp
     all_classes = sorted(list(set(s['lop'] for s in STUDENTS.values())))
     lop_filter = request.args.get('lop', '').strip().upper()
     
-    # Tạo thanh lọc động bằng url_for
     # url_for('students') -> /students
     # url_for('students', lop=c) -> /students?lop=K47A
     filters = [f'<a href="{url_for("students")}">Tất cả</a>']
@@ -58,16 +55,13 @@ def students():
         
     filter_bar = " | ".join(filters)
     
-    # Lọc dữ liệu
     result_lines = []
     for mssv, info in STUDENTS.items():
         if not lop_filter or info['lop'].upper() == lop_filter:
             avg, rank = get_avg_and_rank(info['scores'])
-            # Định dạng thành chuỗi văn bản thay vì bảng HTML
-            line = f"MSSV: {mssv} - Họ tên: {info['name']} - Lớp: {info['lop']} - ĐTB: {avg} - Xếp loại: {rank}"
+            line = f"MSSV: {mssv}, Họ tên: {info['name']}, Lớp: {info['lop']}, ĐTB: {avg}, Xếp loại: {rank}"
             result_lines.append(line)
             
-    # Xử lý hiển thị kết quả
     if not result_lines:
         content = "Không có sinh viên phù hợp"
     else:
