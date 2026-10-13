@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, url_for, abort, redirect, make_response, render_template
+from datetime import date
 import io
 import csv
 
@@ -171,6 +172,22 @@ def api_students():
 @app.route('/about')
 def about():
     return render_template('about.html')
+
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
+
+POSTS = [
+    {"id": 1, "title": "Bài viết 1"},
+]
+
+@app.context_processor
+def inject_globals():
+    return {
+        "site_name": "Nguyễn Đình Tuấn",
+        "current_year": date.today().year,
+        "post_count": len(POSTS),
+    }
 
 if __name__ == '__main__':
     app.run(debug=True)

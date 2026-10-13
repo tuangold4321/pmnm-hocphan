@@ -1,9 +1,25 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
     <div class="container">
-        <div class="navbar-nav">
+        <a class="navbar-brand d-flex align-items-center gap-2 me-auto me-lg-4" href="{{ url_for('hello') }}">
+            <img src="{{ url_for('static', filename='img/imac-svgrepo-com.svg') }}" 
+                 alt="MiniBlog Logo" 
+                 width="30" 
+                 height="30" 
+                 class="d-inline-block align-text-top img-fluid">
+            <span>MiniBlog</span>
+        </a>
+
+        <div class="navbar-nav d-flex flex-row gap-3">
             {% block nav %}
-            <a class="nav-link" href="{{ url_for('hello') }}">Trang chủ</a>
-            <a class="nav-link" href="{{ url_for('about') }}">Giới thiệu</a>
+            <a class="nav-link {{ 'active' if request.endpoint == 'hello' }}" 
+               href="{{ url_for('hello') }}">Trang chủ</a>
+
+            <a class="nav-link {{ 'active' if request.endpoint == 'about' }}" 
+               href="{{ url_for('about') }}">Giới thiệu</a>
+
+            <a class="nav-link {{ 'active' if request.endpoint == 'contact' }}" 
+               href="{{ url_for('contact') }}">Liên hệ</a>
+
             {% endblock %}
         </div>
     </div>
