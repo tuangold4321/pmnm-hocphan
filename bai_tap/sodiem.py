@@ -1,5 +1,4 @@
-from flask import Flask, request, jsonify, url_for, abort, redirect, make_response, render_template
-from datetime import date
+from flask import Flask, request, jsonify, url_for, abort, redirect, make_response
 import io
 import csv
 
@@ -13,13 +12,6 @@ STUDENTS = {
     "23T1020005": {"name": "Hoàng Thu Hà", "lop": "K47A", "scores": {}},
     "23T1020006": {"name": "Võ Quốc Khánh", "lop": "K47C", "scores": {"PMNM": 7.5, "MTK": 8.0}},
 }
-
-# Custom Jinja2 filter registration
-@app.template_filter('format_avg')
-def format_avg_filter(scores_list):
-    if not scores_list:
-        return "-"
-    return f"{sum(scores_list) / len(scores_list):.2f}"
 
 def get_avg_and_rank(scores):
     """Tính điểm trung bình và xếp loại"""
@@ -35,17 +27,6 @@ def get_avg_and_rank(scores):
     else: rank = "Kém"
         
     return avg, rank
-
-@app.route('/')
-@app.route('/hello/<name>')
-def hello(name="Tuấn"):
-    skills = ["python", "flask", "jinja2", "html/css"]
-    return render_template(
-        "hello.html", 
-        name=name, 
-        skills=skills, 
-        students=STUDENTS
-    )
 
 @app.route('/students')
 def students():
@@ -72,7 +53,7 @@ def students():
     DANH SÁCH SINH VIÊN<br>
     {filter_bar}<br><br>
     {content}<br><br>
-    <a href="{url_for('search')}">Tìm kiếm sinh viên</a> | <a href="{url_for('hello')}">Trở về trang chủ</a>
+    <a href="{url_for('search')}">Tìm kiếm sinh viên</a>
     """
 
 @app.route('/sv/<mssv>')
@@ -105,7 +86,7 @@ def student_detail(mssv):
     BẢNG ĐIỂM TỪNG HỌC PHẦN:<br>
     {score_html}<br><br>
     <a href="{export_url}">Tải bảng điểm (CSV)</a><br><br>
-    <a href="{url_for('students')}">Trở về danh sách tổng</a> | <a href="{url_for('hello')}">Về trang chủ</a>
+    <a href="{url_for('students')}">Trở về danh sách tổng</a>
     """
 
 @app.route('/students/<mssv>/export')
@@ -157,7 +138,7 @@ def search():
     TÌM KIẾM SINH VIÊN<br><br>
     {search_form}<br>
     {result_html}<br><br>
-    <a href="{url_for('students')}">Trở về danh sách</a> | <a href="{url_for('hello')}">Về trang chủ</a>
+    <a href="{url_for('students')}">Trở về danh sách</a>
     """
 
 @app.errorhandler(404)
@@ -168,26 +149,6 @@ def page_not_found(e):
 @app.route('/api/students')
 def api_students():
     return jsonify(STUDENTS)
-
-@app.route('/about')
-def about():
-    return render_template('about.html')
-
-@app.route('/contact')
-def contact():
-    return render_template('contact.html')
-
-POSTS = [
-    {"id": 1, "title": "Bài viết 1"},
-]
-
-@app.context_processor
-def inject_globals():
-    return {
-        "site_name": "Nguyễn Đình Tuấn",
-        "current_year": date.today().year,
-        "post_count": len(POSTS),
-    }
 
 if __name__ == '__main__':
     app.run(debug=True)
