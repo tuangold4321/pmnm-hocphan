@@ -8,7 +8,6 @@ POSTS = [
     {"id": 1, "title": "Bài viết 1"},
 ]
 
-
 @app.route("/")
 @app.route("/hello/<name>")
 def hello(name="Tuấn"):
@@ -19,11 +18,9 @@ def hello(name="Tuấn"):
 def about():
     return render_template("about.html")
 
-
 @app.route("/contact")
 def contact():
     return render_template("contact.html")
-
 
 @app.context_processor
 def inject_globals():
@@ -32,7 +29,6 @@ def inject_globals():
         "current_year": date.today().year,
         "post_count": len(POSTS),
     }
-
 
 if __name__ == "__main__":
     app.run(debug=True)
