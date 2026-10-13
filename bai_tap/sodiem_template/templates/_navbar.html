@@ -1,0 +1,10 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <div class="navbar-nav">
+            {% block nav %}
+            <a class="nav-link" href="{{ url_for('hello') }}">Trang chủ</a>
+            <a class="nav-link" href="{{ url_for('about') }}">Giới thiệu</a>
+            {% endblock %}
+        </div>
+    </div>
+</nav>

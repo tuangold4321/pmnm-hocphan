@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, url_for, abort, redirect, make_response
+from flask import Flask, request, jsonify, url_for, abort, redirect, make_response, render_template
 import io
 import csv
 
@@ -12,6 +12,13 @@ STUDENTS = {
     "23T1020005": {"name": "Hoàng Thu Hà", "lop": "K47A", "scores": {}},
     "23T1020006": {"name": "Võ Quốc Khánh", "lop": "K47C", "scores": {"PMNM": 7.5, "MTK": 8.0}},
 }
+
+# Custom Jinja2 filter registration
+@app.template_filter('format_avg')
+def format_avg_filter(scores_list):
+    if not scores_list:
+        return "-"
+    return f"{sum(scores_list) / len(scores_list):.2f}"
 
 def get_avg_and_rank(scores):
     """Tính điểm trung bình và xếp loại"""
@@ -29,18 +36,15 @@ def get_avg_and_rank(scores):
     return avg, rank
 
 @app.route('/')
-def index():
-    total_students = len(STUDENTS)
-    unique_classes = len(set(s['lop'] for s in STUDENTS.values()))
-    
-    return f"""
-    TRANG CHỦ<br>
-    Tổng số sinh viên: {total_students}<br>
-    Số lớp: {unique_classes}<br><br>
-    <a href="{url_for('students')}">Xem danh sách sinh viên</a><br>
-    <a href="{url_for('search')}">Tìm kiếm sinh viên</a><br>
-    <a href="{url_for('api_students')}">Xem dữ liệu API</a>
-    """
+@app.route('/hello/<name>')
+def hello(name="Tuấn"):
+    skills = ["python", "flask", "jinja2", "html/css"]
+    return render_template(
+        "hello.html", 
+        name=name, 
+        skills=skills, 
+        students=STUDENTS
+    )
 
 @app.route('/students')
 def students():
@@ -57,9 +61,7 @@ def students():
     for mssv, info in STUDENTS.items():
         if not lop_filter or info['lop'].upper() == lop_filter:
             avg, rank = get_avg_and_rank(info['scores'])
-            
             sv_url = url_for('redirect_sv', mssv=mssv)
-            
             line = f"MSSV: <a href='{sv_url}'>{mssv}</a> - Họ tên: {info['name']} - Lớp: {info['lop']} - ĐTB: {avg} - Xếp loại: {rank}"
             result_lines.append(line)
             
@@ -69,7 +71,7 @@ def students():
     DANH SÁCH SINH VIÊN<br>
     {filter_bar}<br><br>
     {content}<br><br>
-    <a href="{url_for('search')}">Tìm kiếm sinh viên</a> | <a href="{url_for('index')}">Trở về trang chủ</a>
+    <a href="{url_for('search')}">Tìm kiếm sinh viên</a> | <a href="{url_for('hello')}">Trở về trang chủ</a>
     """
 
 @app.route('/sv/<mssv>')
@@ -102,7 +104,7 @@ def student_detail(mssv):
     BẢNG ĐIỂM TỪNG HỌC PHẦN:<br>
     {score_html}<br><br>
     <a href="{export_url}">Tải bảng điểm (CSV)</a><br><br>
-    <a href="{url_for('students')}">Trở về danh sách tổng</a> | <a href="{url_for('index')}">Về trang chủ</a>
+    <a href="{url_for('students')}">Trở về danh sách tổng</a> | <a href="{url_for('hello')}">Về trang chủ</a>
     """
 
 @app.route('/students/<mssv>/export')
@@ -154,7 +156,7 @@ def search():
     TÌM KIẾM SINH VIÊN<br><br>
     {search_form}<br>
     {result_html}<br><br>
-    <a href="{url_for('students')}">Trở về danh sách</a> | <a href="{url_for('index')}">Về trang chủ</a>
+    <a href="{url_for('students')}">Trở về danh sách</a> | <a href="{url_for('hello')}">Về trang chủ</a>
     """
 
 @app.errorhandler(404)
@@ -165,6 +167,10 @@ def page_not_found(e):
 @app.route('/api/students')
 def api_students():
     return jsonify(STUDENTS)
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
