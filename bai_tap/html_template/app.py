@@ -6,9 +6,9 @@ from flask import Flask, render_template
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Import các Blueprint từ 3 thư mục con
-from bmi.app import bmi_bp
-from diem_hp.app import diem_hp_bp
-from may_tinh.may_tinh import may_tinh_bp
+from bai_tap.tinh_toan.templates.bmi.app import bmi_bp
+from bai_tap.tinh_toan.templates.diem_hp.app import diem_hp_bp
+from bai_tap.tinh_toan.templates.may_tinh.may_tinh import may_tinh_bp
 
 app = Flask(__name__)
 

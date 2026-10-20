@@ -1,14 +1,14 @@
 import math
-from flask import Flask, render_template, request
 
-app = Flask(__name__)
+from flask import Blueprint, render_template, request
 
-valid_ops = {"+", "-", "*", "/"}
+may_tinh_bp = Blueprint("may_tinh", __name__)
+
+VALID_OPS = {"+", "-", "*", "/"}
 
 
 def parse_number(raw):
     raw = (raw or "").strip().replace(",", ".")
-
     if not raw:
         return None
 
@@ -17,20 +17,17 @@ def parse_number(raw):
     except ValueError:
         return None
 
-    if not math.isfinite(value):
-        return None
-
-    return value
+    return value if math.isfinite(value) else None
 
 
-def format_number(x):
-    x = round(x, 10)
-    if x == int(x):
-        return str(int(x))
-    return str(x)
+def format_number(value):
+    value = round(value, 10)
+    if value == int(value):
+        return str(int(value))
+    return str(value)
 
 
-@app.route("/", methods=["GET", "POST"])
+@may_tinh_bp.route("/", methods=["GET", "POST"], strict_slashes=False)
 def calculator():
     a_raw = ""
     b_raw = ""
@@ -48,13 +45,10 @@ def calculator():
 
         if a is None:
             errors["a"] = "Vui lòng nhập số hợp lệ."
-
         if b is None:
             errors["b"] = "Vui lòng nhập số hợp lệ."
-
-        if op not in valid_ops:
-            errors["op"] = (f"Phép toán '{op}' không hợp lệ. ")
-
+        if op not in VALID_OPS:
+            errors["op"] = f"Phép toán '{op}' không hợp lệ."
         if not errors and op == "/" and b == 0:
             errors["b"] = "Không thể chia cho 0."
 
@@ -74,15 +68,11 @@ def calculator():
             )
 
     return render_template(
-        "index.html",
+        "may_tinh/index.html",
         a=a_raw,
         b=b_raw,
         op=op,
         errors=errors,
         result=result,
-        ops=["+", "-", "*", "/"]
+        ops=["+", "-", "*", "/"],
     )
-
-
-if __name__ == "__main__":
-    app.run(debug=True)

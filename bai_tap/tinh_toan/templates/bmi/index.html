@@ -98,7 +98,7 @@
 <div class="card">
     <h2>Tính chỉ số BMI</h2>
     
-    <form method="POST" action="/">
+    <form method="POST" action="{{ url_for('bmi.index') }}">
         <div class="form-group">
             <label for="height">Chiều cao (cm):</label>
             <input type="text" id="height" name="height" 
