@@ -20,6 +20,9 @@
             <a class="nav-link {{ 'active' if request.endpoint == 'contact' }}" 
                href="{{ url_for('contact') }}">Liên hệ</a>
 
+            <a class="nav-link {{ 'active' if request.endpoint in ['tinh_toan', 'bmi.index', 'diem_hp.index', 'may_tinh.index'] }}" 
+               href="{{ url_for('tinh_toan') }}">Tính toán</a>
+
             {% endblock %}
         </div>
     </div>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tính chỉ số BMI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 25px 30px;
+            width: 100%;
+            max-width: 420px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #1b4332;
+            font-size: 20px;
+            border-bottom: 2px solid #2d6a4f;
+            padding-bottom: 8px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+            color: #333;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+        input.input-error {
+            border-color: #d9534f;
+            background-color: #fff0f0;
+        }
+        .error-text {
+            color: #d9534f;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+        button {
+            width: 100%;
+            background-color: #2d6a4f;
+            color: white;
+            border: none;
+            padding: 11px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1b4332;
+        }
+        .result-box {
+            margin-top: 20px;
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        .result-box.green {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .result-box.yellow {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .result-box.red {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Tính chỉ số BMI</h2>
+    
+    <form method="POST" action="/">
+        <div class="form-group">
+            <label for="height">Chiều cao (cm):</label>
+            <input type="text" id="height" name="height" 
+                   value="{{ height_raw }}" 
+                   class="{{ 'input-error' if errors.height else '' }}"
+                   placeholder="Nhập chiều cao (cm)">
+            {% if errors.height %}
+                <div class="error-text">{{ errors.height }}</div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="weight">Cân nặng (kg):</label>
+            <input type="text" id="weight" name="weight" 
+                   value="{{ weight_raw }}" 
+                   class="{{ 'input-error' if errors.weight else '' }}"
+                   placeholder="Nhập cân nặng (kg)">
+            {% if errors.weight %}
+                <div class="error-text">{{ errors.weight }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit">Tính BMI</button>
+    </form>
+
+    {% if result %}
+        <div class="result-box {{ result.css_class }}">
+            <strong>Kết quả:</strong><br>
+            • BMI: <strong>{{ result.bmi }}</strong> - <strong>{{ result.category }}</strong><br>
+            • Cân nặng nên có: <strong>{{ result.weight_min }} – {{ result.weight_max }} kg</strong>
+        </div>
+    {% endif %}
+</div>
+
+</body>
+</html>
