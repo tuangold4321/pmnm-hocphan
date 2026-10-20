@@ -1,0 +1,80 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Máy tính Flask</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 450px;
+            margin: 40px auto;
+        }
+
+        input, select, button {
+            padding: 8px;
+            margin-top: 8px;
+        }
+
+        .error {
+            color: red;
+            background: #ffeaea;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+
+        .result {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h2>Máy tính đơn giản</h2>
+
+    <form method="POST">
+        <label for="a">Số thứ nhất:</label><br>
+        <input id="a" name="a" type="text"
+               value="{{ a }}" placeholder="Nhập số thứ nhất">
+
+        {% if errors.get('a') %}
+            <div class="error">{{ errors.get('a') }}</div>
+        {% endif %}
+
+        <br><br>
+
+        <label for="op">Phép toán:</label><br>
+        <select id="op" name="op">
+            {% for item in ops %}
+                <option value="{{ item }}"
+                    {% if op == item %}selected{% endif %}>
+                    {{ item }}
+                </option>
+            {% endfor %}
+        </select>
+
+        {% if errors.get('op') %}
+            <div class="error">{{ errors.get('op') }}</div>
+        {% endif %}
+
+        <br><br>
+
+        <label for="b">Số thứ hai:</label><br>
+        <input id="b" name="b" type="text"
+               value="{{ b }}" placeholder="Nhập số thứ hai">
+
+        {% if errors.get('b') %}
+            <div class="error">{{ errors.get('b') }}</div>
+        {% endif %}
+
+        <br><br>
+
+        <button type="submit">Tính kết quả</button>
+    </form>
+
+    {% if result %}
+        <h3 class="result">Kết quả: {{ result }}</h3>
+    {% endif %}
+</body>
+</html>

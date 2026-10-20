@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tính điểm học phần</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 420px; margin: 40px auto; padding: 0 16px; }
+    h1 { font-size: 1.5rem; }
+    .field { margin-bottom: 14px; }
+    label { display: block; font-weight: 600; margin-bottom: 4px; }
+    input { width: 100%; padding: 8px; font-size: 1rem; box-sizing: border-box; }
+    .error { color: #c62828; font-size: 0.9rem; margin-top: 4px; }
+    .invalid { border: 1px solid #c62828; }
+    button { padding: 10px 20px; font-size: 1rem; cursor: pointer; }
+    .result { margin-top: 20px; padding: 12px; background: #e8f5e9; border-radius: 6px;
+              font-size: 1.25rem; }
+    .result.fail { background: #ffebee; }
+    .note { font-size: 0.95rem; color: #c62828; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Tính điểm học phần</h1>
+
+  <form method="post">
+    {% for key, label, short, weight in fields %}
+      <div class="field">
+        <label for="{{ key }}">{{ label }}</label>
+        <input type="text" id="{{ key }}" name="{{ key }}" value="{{ values[key] }}"
+               class="{{ 'invalid' if errors[key] }}">
+        {% if errors[key] %}
+          <div class="error">Lỗi ô {{ short }}: {{ errors[key] }}</div>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    <button type="submit">Tính điểm</button>
+  </form>
+
+  {% if result %}
+    <div class="result {{ 'fail' if result.letter == 'F' }}">
+      {{ result.score }} · {{ result.letter }}
+      {% if result.fatal %}
+        <div class="note">(điểm thi dưới 1)</div>
+      {% endif %}
+    </div>
+  {% endif %}
+</body>
+</html>
