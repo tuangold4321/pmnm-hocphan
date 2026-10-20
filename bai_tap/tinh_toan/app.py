@@ -1,3 +1,7 @@
+import sys
+
+sys.dont_write_bytecode = True
+
 from flask import Flask, render_template
 
 from bmi_routes import bmi_bp
