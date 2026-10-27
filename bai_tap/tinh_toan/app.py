@@ -3,11 +3,16 @@ import sys
 sys.dont_write_bytecode = True
 
 from datetime import timedelta
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import (
+    Flask, render_template, request,
+    redirect, url_for, session, flash
+)
 
 from bmi_routes import bmi_bp
 from diem_hp_routes import diem_hp_bp
 from may_tinh_routes import may_tinh_bp
+from forms import RegisterForm
+
 
 app = Flask(__name__)
 
@@ -38,7 +43,8 @@ PROTECTED_BLUEPRINTS = {
 
 @app.before_request
 def check_login():
-    if request.endpoint in ("login", "static"):
+    # Cho phép truy cập đăng nhập, đăng ký và static
+    if request.endpoint in ("login", "register", "static"):
         return None
 
     if request.blueprint in PROTECTED_BLUEPRINTS:
@@ -62,12 +68,41 @@ def home():
 @app.route("/tinh-toan")
 def tinh_toan():
     if "user" not in session:
-        flash("Vui lòng đăng nhập...", "error")
         return redirect(url_for("login"))
 
     return render_template(
         "tinh_toan.html",
         username=session["user"]
+    )
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if "user" in session:
+        return redirect(url_for("home"))
+
+    form = RegisterForm()
+
+    if form.validate_on_submit():
+        username = form.username.data.strip()
+        email = form.email.data.strip()
+
+        # Kiểm tra tên đăng nhập đã tồn tại
+        if username in USERS:
+            form.username.errors.append(
+                "Tên đăng nhập đã được sử dụng."
+            )
+
+        else:
+            # Bài tập yêu cầu thêm tài khoản vào USERS
+            USERS[username] = form.password.data
+
+            flash("Đăng ký thành công!", "success")
+            return redirect(url_for("login"))
+
+    return render_template(
+        "register.html",
+        form=form
     )
 
 
@@ -79,20 +114,20 @@ def login():
     username = ""
 
     if request.method == "POST":
-        username = request.form.get("username", "").strip()
+        username = request.form.get(
+            "username", ""
+        ).strip()
+
         password = request.form.get("password", "")
         remember = request.form.get("remember") == "on"
 
         if username in USERS and USERS[username] == password:
             session.clear()
             session["user"] = username
-
-            session.permanent = remember
-
-            flash(
-                f"Đăng nhập thành công. Xin chào {username}!",
-                "success"
+            session["login_success_message"] = (
+                f"Đăng nhập thành công. Xin chào {username}!"
             )
+            session.permanent = remember
 
             return redirect(url_for("home"))
 

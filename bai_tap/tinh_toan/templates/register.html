@@ -1,0 +1,98 @@
+
+{% extends "base.html" %}
+
+{% macro render_field(field, placeholder="", input_type="text") %}
+<div class="mb-3">
+    {% if field.type == "BooleanField" %}
+        <div class="form-check">
+            {{ field(class="form-check-input") }}
+            {{ field.label(class="form-check-label") }}
+        </div>
+    {% else %}
+        {{ field.label(class="form-label fw-semibold") }}
+
+        {{ field(
+            class="form-control",
+            placeholder=placeholder,
+            type=input_type
+        ) }}
+    {% endif %}
+
+    {% for error in field.errors %}
+        <div class="text-danger small mt-1">
+            {{ error }}
+        </div>
+    {% endfor %}
+</div>
+{% endmacro %}
+
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+
+            <div class="card shadow border-0 rounded-4">
+                <div class="card-body p-4">
+
+                    <h2 class="text-center mb-4">
+                        Đăng ký tài khoản
+                    </h2>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endwith %}
+
+                    <form method="POST"
+                          action="{{ url_for('register') }}">
+
+                        {{ form.hidden_tag() }}
+
+                        {{ render_field(
+                            form.username,
+                            "Tên đăng nhập"
+                        ) }}
+
+                        {{ render_field(
+                            form.email,
+                            "example@gmail.com"
+                        ) }}
+
+                        {{ render_field(
+                            form.password,
+                            "Mật khẩu tối thiểu 8 ký tự",
+                            "password"
+                        ) }}
+
+                        {{ render_field(
+                            form.confirm_password,
+                            "Nhập lại mật khẩu",
+                            "password"
+                        ) }}
+
+                        {{ render_field(form.agree) }}
+
+                        {{ form.submit(
+                            class="btn btn-success w-100"
+                        ) }}
+
+                    </form>
+
+                    <div class="text-center mt-3">
+                        Đã có tài khoản?
+                        <a href="{{ url_for('login') }}">
+                            Đăng nhập
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

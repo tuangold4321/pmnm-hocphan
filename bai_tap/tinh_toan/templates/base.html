@@ -13,12 +13,9 @@
     {% include "_navbar.html" %}
 
     <main class="container py-4">
-        {% set flash_state = namespace(success_message='') %}
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% for category, message in messages %}
-                {% if category == 'success' %}
-                    {% set flash_state.success_message = message %}
-                {% else %}
+                {% if category != 'success' %}
                     <div class="alert alert-danger" role="alert">{{ message }}</div>
                 {% endif %}
             {% endfor %}
@@ -29,7 +26,7 @@
             <div class="card-body p-4">
                 <h1 class="h3 mb-3">Trang chủ</h1>
                 {% if session.get('user') %}
-                    <p>{{ flash_state.success_message or 'Chào mừng bạn đến với hệ thống tính toán.' }}</p>
+                    <p>{{ session.get('login_success_message') or 'Chào mừng bạn đến với hệ thống tính toán.' }}</p>
                     <a href="{{ url_for('profile') }}" class="btn btn-outline-primary">
                         Xem hồ sơ
                     </a>
