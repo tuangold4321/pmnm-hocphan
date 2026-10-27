@@ -1,18 +1,11 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tính chỉ số BMI</title>
-    <style>
+{% extends "base.html" %}
+
+{% block title %}Tính chỉ số BMI{% endblock %}
+
+{% block extra_head %}
+<style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
         }
         .card {
             background-color: #ffffff;
@@ -21,6 +14,7 @@
             padding: 25px 30px;
             width: 100%;
             max-width: 420px;
+            margin: 0 auto;
         }
         h2 {
             margin-top: 0;
@@ -69,6 +63,20 @@
         button:hover {
             background-color: #1b4332;
         }
+        .back-button {
+            display: block;
+            margin-top: 12px;
+            padding: 10px;
+            border: 1px solid #2d6a4f;
+            border-radius: 4px;
+            color: #2d6a4f;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+        }
+        .back-button:hover {
+            background-color: #f0f2f5;
+        }
         .result-box {
             margin-top: 20px;
             padding: 12px 15px;
@@ -92,9 +100,9 @@
             border: 1px solid #f5c6cb;
         }
     </style>
-</head>
-<body>
+{% endblock %}
 
+{% block content %}
 <div class="card">
     <h2>Tính chỉ số BMI</h2>
     
@@ -123,6 +131,7 @@
 
         <button type="submit">Tính BMI</button>
     </form>
+    <a class="back-button" href="{{ url_for('tinh_toan') }}">Quay lại</a>
 
     {% if result %}
         <div class="result-box {{ result.css_class }}">
@@ -132,6 +141,4 @@
         </div>
     {% endif %}
 </div>
-
-</body>
-</html>
+{% endblock %}

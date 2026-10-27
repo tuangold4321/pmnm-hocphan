@@ -1,11 +1,11 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Tính điểm học phần</title>
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 420px; margin: 40px auto; padding: 0 16px; }
+{% extends "base.html" %}
+
+{% block title %}Tính điểm học phần{% endblock %}
+
+{% block extra_head %}
+<style>
+    body { font-family: system-ui, sans-serif; }
+    .score-calculator { max-width: 420px; margin: 0 auto; }
     h1 { font-size: 1.5rem; }
     .field { margin-bottom: 14px; }
     label { display: block; font-weight: 600; margin-bottom: 4px; }
@@ -13,13 +13,24 @@
     .error { color: #c62828; font-size: 0.9rem; margin-top: 4px; }
     .invalid { border: 1px solid #c62828; }
     button { padding: 10px 20px; font-size: 1rem; cursor: pointer; }
+    .back-button {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 10px 20px;
+      border: 1px solid #555;
+      border-radius: 4px;
+      color: inherit;
+      text-decoration: none;
+    }
     .result { margin-top: 20px; padding: 12px; background: #e8f5e9; border-radius: 6px;
               font-size: 1.25rem; }
     .result.fail { background: #ffebee; }
     .note { font-size: 0.95rem; color: #c62828; margin-top: 4px; }
   </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
+<div class="score-calculator">
   <h1>Tính điểm học phần</h1>
 
   <form method="post">
@@ -36,6 +47,7 @@
 
     <button type="submit">Tính điểm</button>
   </form>
+  <a class="back-button" href="{{ url_for('tinh_toan') }}">Quay lại</a>
 
   {% if result %}
     <div class="result {{ 'fail' if result.letter == 'F' }}">
@@ -45,5 +57,5 @@
       {% endif %}
     </div>
   {% endif %}
-</body>
-</html>
+</div>
+{% endblock %}

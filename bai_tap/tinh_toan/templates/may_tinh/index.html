@@ -1,20 +1,31 @@
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Máy tính Flask</title>
-    <style>
+{% extends "base.html" %}
+
+{% block title %}Máy tính Flask{% endblock %}
+
+{% block extra_head %}
+<style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 450px;
-            margin: 40px auto;
         }
 
+        .calculator {
+            max-width: 450px;
+            margin: 0 auto;
+        }
         input, select, button {
             padding: 8px;
             margin-top: 8px;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 8px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            color: inherit;
+            text-decoration: none;
         }
 
         .error {
@@ -29,8 +40,10 @@
             color: green;
         }
     </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
+<div class="calculator">
     <h2>Máy tính đơn giản</h2>
 
     <form method="POST">
@@ -72,9 +85,10 @@
 
         <button type="submit">Tính kết quả</button>
     </form>
+    <a class="back-button" href="{{ url_for('tinh_toan') }}">Quay lại</a>
 
     {% if result %}
         <h3 class="result">Kết quả: {{ result }}</h3>
     {% endif %}
-</body>
-</html>
+</div>
+{% endblock %}

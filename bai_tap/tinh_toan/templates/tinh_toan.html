@@ -1,65 +1,56 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Tính Toán</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            text-align: center;
-            background: #ffffff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .card-container {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-        }
-        .card {
-            display: block;
-            width: 180px;
-            padding: 25px 15px;
-            border-radius: 10px;
-            background-color: #007bff;
-            color: #ffffff;
-            text-decoration: none;
-            font-size: 18px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 123, 255, 0.2);
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            background-color: #0056b3;
-            box-shadow: 0 6px 12px rgba(0, 86, 179, 0.3);
-        }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
 
-    <div class="container">
-        <h1>Chọn Trang Tính Toán</h1>
-        <div class="card-container">
-            <a href="/bmi" class="card">Tính BMI</a>
-            <a href="/diem-hp" class="card">Tính Điểm HP</a>
-            <a href="/may-tinh" class="card">Máy Tính</a>
-        </div>
+{% block title %}Hệ thống tính toán{% endblock %}
+
+{% block extra_head %}
+<style>
+    .calculator-container {
+        text-align: center;
+        background: #ffffff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        width: fit-content;
+        max-width: calc(100% - 32px);
+        margin: 40px auto;
+    }
+
+    .card-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+    }
+
+    .calculator-card {
+        display: block;
+        width: 180px;
+        padding: 25px 15px;
+        border-radius: 10px;
+        background-color: #007bff;
+        color: #ffffff;
+        text-decoration: none;
+        font-size: 18px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 123, 255, 0.2);
+    }
+
+    .calculator-card:hover {
+        transform: translateY(-5px);
+        background-color: #0056b3;
+        box-shadow: 0 6px 12px rgba(0, 86, 179, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="calculator-container">
+    <h1 class="mb-4">Chọn Trang Tính Toán</h1>
+    <div class="card-container">
+        <a href="{{ url_for('bmi.index') }}" class="calculator-card">Tính BMI</a>
+        <a href="{{ url_for('diem_hp.index') }}" class="calculator-card">Tính Điểm HP</a>
+        <a href="{{ url_for('may_tinh.calculator') }}" class="calculator-card">Máy Tính</a>
     </div>
-
-</body>
-</html>
+</div>
+{% endblock %}
