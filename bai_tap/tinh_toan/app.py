@@ -47,6 +47,17 @@ USERS = {
     "an": "an123456",
     "binh": "binh123456"
 }
+TEXT = {"Content-Type": "text/plain; charset=utf-8"}
+
+app.register_blueprint(bmi_bp, url_prefix="/bmi")
+app.register_blueprint(diem_hp_bp, url_prefix="/diem-hp")
+app.register_blueprint(may_tinh_bp, url_prefix="/may-tinh") 
+
+PROTECTED_BLUEPRINTS = {
+    bmi_bp.name,
+    diem_hp_bp.name,
+    may_tinh_bp.name
+}
 
 @app.get("/them-mau")
 def add_sample():
@@ -67,18 +78,31 @@ def add_sample():
             f"Trước commit = {before}, "
             f"Sau commit = {an.id}")
 
-app.register_blueprint(bmi_bp, url_prefix="/bmi")
-app.register_blueprint(diem_hp_bp, url_prefix="/diem-hp")
-app.register_blueprint(may_tinh_bp, url_prefix="/may-tinh")
+@app.get("/thu-truy-van")
+def try_queries():
+    if db.session.scalar(db.select(func.count(Student.id))) == 0:
+        return "Chưa có dữ liệu, hãy mở /them-mau trước."
+    lines = []
+    lines.append(f"1. get(3): {db.session.get(Student, 3)}")
+    lines.append(f"2. get(99): {db.session.get(Student, 99)}")
+    everyone = db.session.execute(db.select(Student)).scalars().all()
+    lines.append(f"3. Tất cả: {len(everyone)} sinh viên")
+    stmt = (db.select(Student).where(Student.gpa >= 8).order_by(Student.gpa.desc()))
+    good = db.session.execute(stmt).scalars().all()
+    lines.append(f"4. Điểm >= 8: {good}")
+    binh = db.session.scalar(db.select(Student).filter_by(mssv="23T1020002"))
+    lines.append(f"5. MSSV 23T1020002: {binh}")
+    count = db.session.scalar(db.select(func.count(Student.id)))
+    avg = db.session.scalar(db.select(func.avg(Student.gpa)))
+    lines.append(f"6. Số SV: {count}, Điểm trung bình: {avg:.2f}")
+    return "\n".join(lines), TEXT
 
-
-PROTECTED_BLUEPRINTS = {
-    bmi_bp.name,
-    diem_hp_bp.name,
-    may_tinh_bp.name
-}
-
-
+@app.get("/danh_sach")
+def danh_sach():
+    students = db.session.execute(
+        db.select(Student).order_by(Student.id)
+    ).scalars().all()
+    return render_template("danhsach.html", students=students)
 
 @app.before_request
 def check_login():
@@ -184,6 +208,7 @@ def profile():
         "profile.html",
         username=session["user"]
     )
+
 
 
 @app.route("/logout", methods=["POST"])

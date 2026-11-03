@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Danh sách sinh viên{% endblock %}
+
+{% block content %}
+<section class="card shadow-sm">
+    <div class="card-body">
+        <h1 class="h3 mb-4">Danh sách sinh viên</h1>
+
+        {% if students %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>MSSV</th>
+                        <th>Họ tên</th>
+                        <th>GPA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.id }}</td>
+                        <td>{{ student.mssv }}</td>
+                        <td>{{ student.name }}</td>
+                        <td>{{ "%.2f"|format(student.gpa) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="mb-0">Chưa có sinh viên nào trong cơ sở dữ liệu.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
