@@ -7,6 +7,13 @@ from flask import (
     Flask, render_template, request,
     redirect, url_for, session, flash
 )
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import String, func
+class Base(DeclarativeBase):
+    pass
+
+db = SQLAlchemy(model_class=Base)
 
 from bmi_routes import bmi_bp
 from diem_hp_routes import diem_hp_bp
@@ -16,7 +23,20 @@ from forms import RegisterForm
 
 app = Flask(__name__)
 
-app.secret_key = "thay-bang-khoa-bi-mat-rieng"
+app.config["SECRET_KEY"] = "your_secret_key"
+app.config["SQLALCHEMY_DATABASE_URI"] = \
+    "sqlite:///qlsv.db"
+db.init_app(app)
+
+class Student(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    mssv: Mapped[str] = mapped_column(String(10), unique=True)
+    name: Mapped[str] = mapped_column(String(100))
+    gpa: Mapped[float] = mapped_column(default=0.0)
+    def __repr__(self):
+        return f"<Student {self.mssv} {self.name}>"
+with app.app_context():
+    db.create_all()
 
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
 app.config["SESSION_COOKIE_HTTPONLY"] = True
@@ -28,6 +48,24 @@ USERS = {
     "binh": "binh123456"
 }
 
+@app.get("/them-mau")
+def add_sample():
+    total = db.session.scalar(db.select(func.count(Student.id)))
+    if total > 0:
+        return f"Đã có {total} sinh viên, không thêm nữa."
+    an = Student(mssv="23T1020001", name="Nguyễn Văn An", gpa=8.5)
+    before = an.id
+    db.session.add(an)
+    db.session.add_all([
+        Student(mssv="23T1020002", name="Trần Thị Bình", gpa=6.8),
+        Student(mssv="23T1020003", name="Lê Hoàng Cường", gpa=9.1),
+        Student(mssv="23T1020004", name="Phạm Minh Dũng", gpa=4.5),
+        Student(mssv="23T1020005", name="Hoàng Thu Hà", gpa=7.4),
+    ])
+    db.session.commit()
+    return (f"Đã thêm 5 sinh viên id của An: "
+            f"Trước commit = {before}, "
+            f"Sau commit = {an.id}")
 
 app.register_blueprint(bmi_bp, url_prefix="/bmi")
 app.register_blueprint(diem_hp_bp, url_prefix="/diem-hp")
@@ -41,9 +79,9 @@ PROTECTED_BLUEPRINTS = {
 }
 
 
+
 @app.before_request
 def check_login():
-    # Cho phép truy cập đăng nhập, đăng ký và static
     if request.endpoint in ("login", "register", "static"):
         return None
 
@@ -87,14 +125,12 @@ def register():
         username = form.username.data.strip()
         email = form.email.data.strip()
 
-        # Kiểm tra tên đăng nhập đã tồn tại
         if username in USERS:
             form.username.errors.append(
                 "Tên đăng nhập đã được sử dụng."
             )
 
         else:
-            # Bài tập yêu cầu thêm tài khoản vào USERS
             USERS[username] = form.password.data
 
             flash("Đăng ký thành công!", "success")
