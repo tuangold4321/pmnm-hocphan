@@ -1,102 +1,24 @@
-{% extends "base.html" %}
-{% block title %}Dashboard{% endblock %}
-{% block breadcrumb %}Tổng quan{% endblock %}
+{% extends 'base.html' %}
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-  <div>
-    <h1 class="h2 mb-1">Dashboard</h1>
-    <p class="text-secondary mb-0">Theo dõi danh mục và sách trong thư viện của bạn.</p>
-  </div>
-  <a class="btn btn-primary" href="{{ url_for('add_book') }}">＋ Thêm sách mới</a>
-</div>
-
-<div class="row g-3 mb-4">
-  <div class="col-md-4">
-    <article class="card border-0 shadow-sm h-100">
-      <div class="card-body">
-        <div class="text-secondary small fw-semibold text-uppercase">Tổng danh mục</div>
-        <div class="display-6 fw-semibold my-2">{{ stats.categories }}</div>
-        <a class="link-primary text-decoration-none" href="{{ url_for('categories') }}">Quản lý danh mục →</a>
-      </div>
-    </article>
-  </div>
-  <div class="col-md-4">
-    <article class="card border-0 shadow-sm h-100">
-      <div class="card-body">
-        <div class="text-secondary small fw-semibold text-uppercase">Tổng đầu sách</div>
-        <div class="display-6 fw-semibold my-2">{{ stats.books }}</div>
-        <a class="link-primary text-decoration-none" href="{{ url_for('books') }}">Xem danh sách sách →</a>
-      </div>
-    </article>
-  </div>
-  <div class="col-md-4">
-    <article class="card border-0 shadow-sm h-100">
-      <div class="card-body">
-        <div class="text-secondary small fw-semibold text-uppercase">Danh mục có sách</div>
-        <div class="display-6 fw-semibold my-2">{{ stats.categories - stats.books_without_category }}</div>
-        <span class="text-secondary">trên {{ stats.categories }} danh mục</span>
-      </div>
-    </article>
-  </div>
-</div>
-
-<div class="row g-3">
-  <div class="col-lg-7">
-    <section class="card border-0 shadow-sm h-100">
-      <div class="card-header bg-white border-0 pt-3 px-3">
-        <div class="d-flex justify-content-between align-items-start gap-2">
-          <div><h2 class="h5 mb-1">Sách mới cập nhật</h2><p class="text-secondary small mb-0">Các đầu sách được thêm gần đây</p></div>
-          <a class="link-primary text-decoration-none small" href="{{ url_for('books') }}">Xem tất cả →</a>
+<h2 class="mb-4">Tổng quan hệ thống</h2>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Tổng số Danh mục</h5>
+                <h2 class="card-text">{{ total_categories }}</h2>
+                <a href="/categories" class="text-white text-decoration-none">Quản lý danh mục →</a>
+            </div>
         </div>
-      </div>
-      {% if recent_books %}
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light"><tr><th scope="col">Tên sách</th><th scope="col">Tác giả</th><th scope="col">Danh mục</th></tr></thead>
-            <tbody>
-            {% for book in recent_books %}
-              <tr>
-                <td><a class="link-dark fw-semibold text-decoration-none" href="{{ url_for('edit_book', book_id=book.id) }}">{{ book.title }}</a></td>
-                <td>{{ book.author }}</td>
-                <td><span class="badge text-bg-light border">{{ book.category_name }}</span></td>
-              </tr>
-            {% endfor %}
-            </tbody>
-          </table>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Tổng số Sách</h5>
+                <h2 class="card-text">{{ total_books }}</h2>
+                <a href="/books" class="text-white text-decoration-none">Quản lý sách →</a>
+            </div>
         </div>
-      {% else %}
-        <div class="card-body text-center py-5">
-          <div class="fs-2 mb-2">📖</div><h3 class="h6">Chưa có sách nào</h3>
-          <p class="text-secondary small">Thêm đầu sách đầu tiên vào thư viện.</p>
-          <a class="btn btn-outline-primary btn-sm" href="{{ url_for('add_book') }}">Thêm sách</a>
-        </div>
-      {% endif %}
-    </section>
-  </div>
-  <div class="col-lg-5">
-    <section class="card border-0 shadow-sm h-100">
-      <div class="card-header bg-white border-0 pt-3 px-3">
-        <div class="d-flex justify-content-between align-items-start gap-2">
-          <div><h2 class="h5 mb-1">Sách theo danh mục</h2><p class="text-secondary small mb-0">Phân bố đầu sách trong thư viện</p></div>
-          <a class="link-primary text-decoration-none small" href="{{ url_for('categories') }}">Quản lý →</a>
-        </div>
-      </div>
-      {% if category_stats %}
-        <div class="list-group list-group-flush">
-          {% for category in category_stats %}
-            <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center gap-2" href="{{ url_for('books', danh_muc=category.id) }}">
-              <span class="text-truncate">{{ category.name }}</span><span class="badge text-bg-primary rounded-pill">{{ category.book_count }} sách</span>
-            </a>
-          {% endfor %}
-        </div>
-      {% else %}
-        <div class="card-body text-center py-5">
-          <div class="fs-2 mb-2">🗂️</div><h3 class="h6">Chưa có danh mục</h3>
-          <p class="text-secondary small">Tạo danh mục để bắt đầu sắp xếp sách.</p>
-          <a class="btn btn-outline-primary btn-sm" href="{{ url_for('add_category') }}">Thêm danh mục</a>
-        </div>
-      {% endif %}
-    </section>
-  </div>
+    </div>
 </div>
 {% endblock %}

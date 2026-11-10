@@ -1,57 +1,68 @@
-{% extends "base.html" %}
-{% block title %}Sách{% endblock %}
-{% block breadcrumb %}Sách{% endblock %}
+{% extends 'base.html' %}
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-  <div><h1 class="h2 mb-1">Sách</h1><p class="text-secondary mb-0">Quản lý đầu sách và thông tin xuất bản.</p></div>
-  <a class="btn btn-primary" href="{{ url_for('add_book', danh_muc=selected_category) if selected_category else url_for('add_book') }}">＋ Thêm sách</a>
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-dark text-white">Thêm Sách</div>
+            <div class="card-body">
+                <form method="POST" action="/books">
+                    <div class="mb-3">
+                        <label class="form-label">Tên sách</label>
+                        <input type="text" name="title" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tác giả</label>
+                        <input type="text" name="author" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Danh mục</label>
+                        <select name="category_id" class="form-select" required>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Thêm Sách</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <table class="table table-bordered table-striped bg-white">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Tên Sách</th>
+                    <th>Tác giả</th>
+                    <th>Danh mục</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                <tr>
+                    <form method="POST" action="/books/edit/{{ book.id }}">
+                        <td>{{ book.id }}</td>
+                        <td><input type="text" name="title" value="{{ book.title }}" class="form-control form-control-sm" required></td>
+                        <td><input type="text" name="author" value="{{ book.author }}" class="form-control form-control-sm" required></td>
+                        <td>
+                            <select name="category_id" class="form-select form-select-sm" required>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.id }}" {% if cat.id == book.category_id %}selected{% endif %}>{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-sm btn-warning">Lưu</button>
+                                <a href="/books/delete/{{ book.id }}" class="btn btn-sm btn-danger" onclick="return confirm('Xóa sách này?');">Xóa</a>
+                            </div>
+                        </td>
+                    </form>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
-<section class="card border-0 shadow-sm">
-  <form class="row g-2 align-items-center p-3 border-bottom" method="get" action="{{ url_for('books') }}">
-    <div class="col-lg">
-      <label class="visually-hidden" for="q">Tìm sách</label>
-      <input class="form-control" id="q" type="search" name="q" value="{{ search }}" placeholder="Tìm theo tên sách, tác giả, ISBN">
-    </div>
-    <div class="col-sm-7 col-lg-3">
-      <label class="visually-hidden" for="danh_muc">Lọc theo danh mục</label>
-      <select class="form-select" id="danh_muc" name="danh_muc" aria-label="Lọc theo danh mục">
-        <option value="">Tất cả danh mục</option>
-        {% for category in categories %}<option value="{{ category.id }}" {% if selected_category == category.id %}selected{% endif %}>{{ category.name }}</option>{% endfor %}
-      </select>
-    </div>
-    <div class="col-auto"><button class="btn btn-outline-primary" type="submit">Lọc sách</button></div>
-    {% if search or selected_category %}<div class="col-auto"><a class="btn btn-link link-secondary text-decoration-none" href="{{ url_for('books') }}">Xóa lọc</a></div>{% endif %}
-  </form>
-  {% if books %}
-    <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
-        <thead class="table-light"><tr><th scope="col">Tên sách</th><th scope="col">Tác giả</th><th scope="col">ISBN</th><th scope="col">Danh mục</th><th scope="col">Năm</th><th scope="col" class="text-end">Thao tác</th></tr></thead>
-        <tbody>
-        {% for book in books %}
-          <tr>
-            <td><a class="link-dark fw-semibold text-decoration-none" href="{{ url_for('edit_book', book_id=book.id) }}">{{ book.title }}</a>{% if book.publisher %}<div class="small text-secondary">{{ book.publisher }}</div>{% endif %}</td>
-            <td>{{ book.author }}</td>
-            <td class="text-secondary">{{ book.isbn or "—" }}</td>
-            <td><span class="badge text-bg-light border">{{ book.category_name }}</span></td>
-            <td>{{ book.published_year or "—" }}</td>
-            <td class="text-end text-nowrap">
-              <a class="btn btn-sm btn-outline-primary" href="{{ url_for('edit_book', book_id=book.id) }}">Sửa</a>
-              <form class="d-inline" method="post" action="{{ url_for('delete_book', book_id=book.id) }}" onsubmit="return confirm('Bạn có chắc muốn xóa sách này?')">
-                <button class="btn btn-sm btn-outline-danger" type="submit">Xóa</button>
-              </form>
-            </td>
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  {% else %}
-    <div class="card-body text-center py-5">
-      <div class="fs-2 mb-2">📖</div>
-      <h2 class="h5">{% if search or selected_category %}Không tìm thấy sách{% else %}Chưa có sách nào{% endif %}</h2>
-      <p class="text-secondary">{% if search or selected_category %}Thử thay đổi từ khóa hoặc bộ lọc.{% else %}Thêm sách và gắn sách vào một danh mục.{% endif %}</p>
-      {% if not search and not selected_category %}<a class="btn btn-primary" href="{{ url_for('add_book') }}">＋ Thêm sách</a>{% else %}<a class="btn btn-outline-secondary" href="{{ url_for('books') }}">Xóa bộ lọc</a>{% endif %}
-    </div>
-  {% endif %}
-</section>
 {% endblock %}
