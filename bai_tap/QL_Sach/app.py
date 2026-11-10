@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.secret_key = 'super-secret-key'
+app.secret_key = 'super-secret-key' # Placeholder nếu cần secret key
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///qlsach.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
