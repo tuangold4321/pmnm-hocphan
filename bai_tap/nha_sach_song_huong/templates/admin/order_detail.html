@@ -1,0 +1,133 @@
+{% extends 'admin/admin_layout.html' %}
+{% block admin_content %}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="small mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin_orders') }}" class="text-muted text-decoration-none">Đơn hàng</a></li>
+        <li class="breadcrumb-item active" aria-current="page">#{{ order.id }}</li>
+    </ol>
+</nav>
+
+<h4 class="fw-bold mb-4">Đơn hàng #{{ order.id }} &middot; {{ order.created_at.strftime('%d/%m/%Y %H:%M') }}</h4>
+
+<div class="row">
+    <!-- Cột Trái: Thông tin & Giỏ hàng -->
+    <div class="col-md-8">
+        
+        <!-- Box Thông tin khách hàng -->
+        <div class="card border-0 bg-light rounded-3 mb-4">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3">Khách hàng</h6>
+                <p class="mb-2 text-secondary">{{ order.customer_name }} &middot; {{ order.phone }}</p>
+                <p class="mb-2 text-secondary">{{ order.address }}</p>
+                <p class="mb-2 text-secondary">
+                    Thanh toán: {{ 'Chuyển khoản' if order.payment_method == 'transfer' else 'Tiền mặt khi nhận hàng' }}
+                </p>
+                {% if order.note %}
+                    <p class="mb-0 text-muted small">Ghi chú: {{ order.note }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Bảng chi tiết đơn -->
+        <table class="table align-middle border-bottom mb-4">
+            <thead class="text-muted small border-bottom-0">
+                <tr>
+                    <th scope="col" class="fw-normal">Sách</th>
+                    <th scope="col" class="fw-normal text-end">Đơn giá</th>
+                    <th scope="col" class="fw-normal text-center">SL</th>
+                    <th scope="col" class="fw-normal text-end">Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items %}
+                <tr>
+                    <td class="text-secondary py-3">{{ item.book.title }}</td>
+                    <td class="text-end text-secondary">{{ "{:,.0f}".format(item.unit_price).replace(',', '.') }}</td>
+                    <td class="text-center text-secondary">{{ item.quantity }}</td>
+                    <td class="text-end text-secondary">{{ "{:,.0f}".format(item.unit_price * item.quantity).replace(',', '.') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Tính tổng -->
+        <div class="d-flex justify-content-end mb-2 pe-2">
+            <span class="text-secondary me-5">Phí giao hàng</span>
+            <span class="text-success fw-bold">{{ "Miễn phí" if order.shipping_fee == 0 else "{:,.0f}".format(order.shipping_fee).replace(',', '.') ~ " đ" }}</span>
+        </div>
+        <div class="d-flex justify-content-end align-items-center mb-4 pe-2">
+            <h6 class="fw-bold me-5 mb-0">Tổng cộng</h6>
+            <h4 class="fw-bold text-orange mb-0" style="color: #ea580c;">{{ "{:,.0f}".format(order.total_amount).replace(',', '.') }} đ</h4>
+        </div>
+        
+        <p class="text-muted small">Đơn giá là giá tại thời điểm đặt (OrderItem.unit_price)</p>
+    </div>
+
+    <!-- Cột Phải: Trạng thái & Lịch sử -->
+    <div class="col-md-4">
+        
+        <!-- Form cập nhật trạng thái -->
+        <div class="card border border-light shadow-sm rounded-3 mb-4">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3">Trạng thái</h6>
+                
+                <div class="mb-4">
+                    {% if order.status == 'Chờ xác nhận' %}
+                        <span class="badge rounded-pill px-3 py-1" style="background-color: #ffedd5; color: #c2410c;">Chờ xác nhận</span>
+                    {% elif order.status == 'Đang giao' %}
+                        <span class="badge rounded-pill px-3 py-1" style="background-color: #dbeafe; color: #1d4ed8;">Đang giao</span>
+                    {% elif order.status == 'Hoàn tất' %}
+                        <span class="badge rounded-pill px-3 py-1" style="background-color: #dcfce7; color: #15803d;">Hoàn tất</span>
+                    {% else %}
+                        <span class="badge rounded-pill px-3 py-1" style="background-color: #f1f5f9; color: #475569;">Đã huỷ</span>
+                    {% endif %}
+                </div>
+
+                {% if order.status in ['Chờ xác nhận', 'Đang giao'] %}
+                    <form method="POST" action="{{ url_for('admin_order_detail', id=order.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        
+                        <label class="form-label text-secondary small">Chuyển sang</label>
+                        <select name="new_status" class="form-select bg-light mb-3">
+                            {% for st in next_statuses %}
+                                <option value="{{ st }}">{{ st }}</option>
+                            {% endfor %}
+                        </select>
+                        
+                        <button type="submit" name="action" value="update" class="btn btn-primary w-100 mb-3 rounded-3 py-2">Cập nhật</button>
+                        
+                        <button type="submit" name="action" value="cancel" class="btn btn-outline-danger w-100 rounded-3 py-2 bg-white" 
+                                onclick="return confirm('Bạn có chắc muốn huỷ đơn hàng này? Tồn kho sẽ được hoàn lại.');">
+                            Huỷ đơn
+                        </button>
+                    </form>
+                {% else %}
+                    <p class="text-muted small fst-italic m-0">Đơn hàng đã chốt, không thể thay đổi trạng thái.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Lịch sử -->
+        <div class="card border border-light shadow-sm rounded-3">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3">Lịch sử</h6>
+                <ul class="list-unstyled mb-0 position-relative" style="padding-left: 1.5rem;">
+                    <!-- Line kết nối (mô phỏng timeline) -->
+                    <div class="position-absolute h-100 border-start" style="left: 0.5rem; top: 0.5rem; z-index: 1;"></div>
+                    
+                    {% for history in order.history %}
+                        <li class="mb-3 position-relative z-index-2">
+                            <span class="position-absolute bg-primary rounded-circle" style="width: 8px; height: 8px; left: -1.2rem; top: 6px;"></span>
+                            <div class="small text-secondary mb-1">{{ history.timestamp.strftime('%d/%m %H:%M') }} - {{ history.status }}</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

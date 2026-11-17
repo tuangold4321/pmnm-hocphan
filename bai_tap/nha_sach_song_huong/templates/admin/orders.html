@@ -1,0 +1,99 @@
+{% extends 'admin/admin_layout.html' %}
+{% block admin_content %}
+
+<h4 class="fw-bold mb-4">Đơn hàng</h4>
+
+<!-- Tabs trạng thái -->
+<ul class="nav nav-tabs mb-4 border-bottom-0 gap-3">
+    <li class="nav-item">
+        <a class="nav-link {% if not current_status %}active fw-bold text-dark{% else %}text-muted{% endif %} rounded-pill px-3 py-1" 
+           href="{{ url_for('admin_orders') }}">
+            Tất cả ({{ total_orders }})
+        </a>
+    </li>
+    {% set statuses = [
+        ('Chờ xác nhận', 'warning', '#ffedd5', '#c2410c'), 
+        ('Đang giao', 'primary', '#dbeafe', '#1d4ed8'), 
+        ('Hoàn tất', 'success', '#dcfce7', '#15803d'), 
+        ('Đã huỷ', 'secondary', '#f1f5f9', '#475569')
+    ] %}
+    {% for st, bs_color, bg_color, text_color in statuses %}
+        <li class="nav-item">
+            <a class="nav-link {% if current_status == st %}active fw-bold text-dark{% else %}text-muted{% endif %} rounded-pill px-3 py-1" 
+               href="{{ url_for('admin_orders', status=st) }}"
+               {% if current_status == st %}style="background-color: {{ bg_color }}; color: {{ text_color }} !important;"{% endif %}>
+                {{ st }} ({{ status_counts.get(st, 0) }})
+            </a>
+        </li>
+    {% endfor %}
+</ul>
+
+<!-- Form tìm kiếm -->
+<form method="GET" action="{{ url_for('admin_orders') }}" class="d-flex gap-2 mb-4" style="max-width: 600px;">
+    {% if current_status %}
+        <input type="hidden" name="status" value="{{ current_status }}">
+    {% endif %}
+    <input type="text" name="search" class="form-control bg-light border-0" placeholder="Mã đơn, tên khách hàng, số điện thoại..." value="{{ request.args.get('search', '') }}">
+    <button type="submit" class="btn btn-primary px-4">Tìm</button>
+</form>
+
+<!-- Bảng đơn hàng -->
+<div class="table-responsive bg-white rounded border border-bottom-0 mb-3">
+    <table class="table table-hover align-middle mb-0">
+        <thead class="bg-light text-muted small">
+            <tr>
+                <th scope="col" class="fw-normal">Mã</th>
+                <th scope="col" class="fw-normal">Ngày đặt</th>
+                <th scope="col" class="fw-normal">Khách hàng</th>
+                <th scope="col" class="fw-normal">Điện thoại</th>
+                <th scope="col" class="fw-normal text-end">Tổng tiền</th>
+                <th scope="col" class="fw-normal text-center">Trạng thái</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in pagination.items %}
+            <tr onclick="window.location='{{ url_for('admin_order_detail', id=order.id) }}';" style="cursor: pointer;">
+                <td class="fw-bold text-dark">#{{ order.id }}</td>
+                <td class="text-secondary">{{ order.created_at.strftime('%d/%m/%Y') }}</td>
+                <td class="text-secondary">{{ order.customer_name }}</td>
+                <td class="text-secondary">{{ order.phone }}</td>
+                <td class="text-end text-dark">{{ "{:,.0f}".format(order.total_amount).replace(',', '.') }} đ</td>
+                <td class="text-center">
+                    {% if order.status == 'Chờ xác nhận' %}
+                        <span class="badge rounded-pill" style="background-color: #ffedd5; color: #c2410c;">Chờ xác nhận</span>
+                    {% elif order.status == 'Đang giao' %}
+                        <span class="badge rounded-pill" style="background-color: #dbeafe; color: #1d4ed8;">Đang giao</span>
+                    {% elif order.status == 'Hoàn tất' %}
+                        <span class="badge rounded-pill" style="background-color: #dcfce7; color: #15803d;">Hoàn tất</span>
+                    {% else %}
+                        <span class="badge rounded-pill" style="background-color: #f1f5f9; color: #475569;">Đã huỷ</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Dòng tổng kết & Phân trang -->
+<div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-2">
+    <span class="text-secondary">{{ pagination.items|length }} đơn - tổng giá trị</span>
+    <h5 class="fw-bold mb-0 text-orange" style="color: #ea580c;">{{ "{:,.0f}".format(total_filtered_value).replace(',', '.') }} đ</h5>
+</div>
+<small class="text-muted d-block mb-4">Bấm vào một dòng để xem chi tiết đơn hàng</small>
+
+<ul class="pagination pagination-sm">
+    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+        {% if page_num %}
+            {% set request_args = request.args.to_dict() %}
+            {% set _ = request_args.update({'page': page_num}) %}
+            <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('admin_orders', **request_args) }}">{{ page_num }}</a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+    {% endfor %}
+</ul>
+
+{% endblock %}

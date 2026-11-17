@@ -1,0 +1,140 @@
+{% extends 'admin/admin_layout.html' %}
+{% block admin_content %}
+<h4 class="fw-bold mb-4">Tổng quan</h4>
+
+<!-- 4 Thẻ thống kê -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card bg-light border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small mb-2">Đầu sách</div>
+                <h3 class="fw-bold text-dark mb-0">{{ total_books }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-light border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small mb-2">Đơn chờ xác nhận</div>
+                <h3 class="fw-bold text-orange mb-0" style="color: #ea580c;">{{ pending_orders }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-light border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small mb-2">Doanh thu tháng {{ current_month }}</div>
+                <h4 class="fw-bold text-success mb-0" style="color: #16a34a !important;">{{ "{:,.0f}".format(monthly_revenue).replace(',', '.') }} đ</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-light border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small mb-2">Sắp hết hàng</div>
+                <h3 class="fw-bold text-danger mb-0">{{ low_stock|length }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Cột Trái: Đơn hàng mới nhất -->
+    <div class="col-md-8">
+        <h6 class="fw-bold mb-3">Đơn hàng mới nhất</h6>
+        <div class="table-responsive">
+            <table class="table table-borderless align-middle border rounded">
+                <thead class="bg-light text-muted small">
+                    <tr>
+                        <th class="fw-normal">Mã</th>
+                        <th class="fw-normal">Khách hàng</th>
+                        <th class="fw-normal">Tổng tiền</th>
+                        <th class="fw-normal text-center">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr class="border-bottom">
+                        <td class="text-muted">#{{ order.id }}</td>
+                        <td>{{ order.customer_name }}</td>
+                        <td>{{ "{:,.0f}".format(order.total_amount).replace(',', '.') }} đ</td>
+                        <td class="text-center">
+                            <!-- Màu sắc badge chuẩn thiết kế -->
+                            {% if order.status == 'Chờ xác nhận' %}
+                                <span class="badge rounded-pill" style="background-color: #ffedd5; color: #c2410c;">Chờ xác nhận</span>
+                            {% elif order.status == 'Đang giao' %}
+                                <span class="badge rounded-pill" style="background-color: #dbeafe; color: #1d4ed8;">Đang giao</span>
+                            {% elif order.status == 'Hoàn tất' %}
+                                <span class="badge rounded-pill" style="background-color: #dcfce7; color: #15803d;">Hoàn tất</span>
+                            {% else %}
+                                <span class="badge rounded-pill" style="background-color: #f1f5f9; color: #475569;">Đã huỷ</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <a href="{{ url_for('admin_orders') }}" class="text-decoration-none mt-2 d-inline-block">Xem tất cả đơn hàng →</a>
+    </div>
+
+    <!-- Cột Phải: Sách sắp hết & Biểu đồ -->
+    <div class="col-md-4">
+        <!-- Danh sách Sắp hết hàng -->
+        <div class="card border border-light shadow-sm mb-4 bg-light">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Sắp hết hàng (≤ 5)</h6>
+                <ul class="list-unstyled mb-3">
+                    {% for book in low_stock %}
+                    <li class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                        <span class="text-muted">{{ book.title }}</span>
+                        <strong class="text-danger">{{ book.stock }}</strong>
+                    </li>
+                    {% else %}
+                    <li class="text-muted small">Không có sách sắp hết.</li>
+                    {% endfor %}
+                </ul>
+                <a href="{{ url_for('admin_books') }}" class="text-decoration-none small">Nhập thêm sách →</a>
+            </div>
+        </div>
+
+        <!-- Biểu đồ doanh thu -->
+        <h6 class="fw-bold mb-3">Doanh thu 7 ngày</h6>
+        <div style="height: 180px;">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Truyền dữ liệu từ Python sang Javascript để vẽ biểu đồ
+    const labels = {{ chart_labels | tojson }};
+    const dataValues = {{ chart_data | tojson }};
+
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Doanh thu (VNĐ)',
+                data: dataValues,
+                backgroundColor: '#3b82f6', // Màu xanh dương nhạt như hình
+                borderRadius: 4,
+                barPercentage: 0.6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }, // Tắt chú thích
+            scales: {
+                x: { grid: { display: false } },
+                y: { display: false } // Tắt cột Y cho gọn giống mockup
+            }
+        }
+    });
+</script>
+{% endblock %}

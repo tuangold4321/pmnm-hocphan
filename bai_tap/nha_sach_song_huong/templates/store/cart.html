@@ -1,0 +1,89 @@
+{% extends 'layout.html' %}
+{% block content %}
+
+<h3 class="fw-bold mb-4">Giỏ hàng ({{ cart_items|length }} đầu sách)</h3>
+
+{% if not cart_items %}
+    <div class="text-center py-5">
+        <h5 class="text-muted mb-3">Giỏ hàng trống</h5>
+        <a href="{{ url_for('books') }}" class="btn btn-outline-primary">← Trở về danh sách sách</a>
+    </div>
+{% else %}
+    <div class="table-responsive mb-4">
+        <table class="table align-middle">
+            <thead class="text-muted small border-bottom border-top-0 border-start-0 border-end-0">
+                <tr>
+                    <th scope="col" class="fw-normal pb-3" style="width: 40%;">Sách</th>
+                    <th scope="col" class="fw-normal pb-3">Đơn giá</th>
+                    <th scope="col" class="fw-normal pb-3 text-center">Số lượng</th>
+                    <th scope="col" class="fw-normal pb-3 text-end">Thành tiền</th>
+                    <th scope="col" class="fw-normal pb-3 text-end" style="width: 80px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <!-- Thông tin sách -->
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 60px;">
+                                {% if item.book.image %}
+                                    <img src="{{ url_for('static', filename='uploads/' + item.book.image) }}" alt="" style="max-height: 50px; max-width: 40px;">
+                                {% endif %}
+                            </div>
+                            <a href="{{ url_for('book_detail', id=item.book.id) }}" class="text-decoration-none text-secondary">{{ item.book.title }}</a>
+                        </div>
+                    </td>
+                    <!-- Đơn giá -->
+                    <td class="text-secondary">{{ "{:,.0f}".format(item.book.price).replace(',', '.') }} đ</td>
+                    <!-- Nút Tăng/Giảm -->
+                    <td class="text-center">
+                        <form action="{{ url_for('update_cart', book_id=item.book.id) }}" method="POST" class="d-inline-flex justify-content-center">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <div class="input-group input-group-sm" style="width: 110px;">
+                                <button type="submit" name="action" value="decrease" class="btn btn-outline-primary px-3">−</button>
+                                <input type="text" class="form-control text-center bg-light" value="{{ item.quantity }}" readonly>
+                                <button type="submit" name="action" value="increase" class="btn btn-outline-primary px-3" {% if item.quantity >= item.book.stock %}disabled{% endif %}>+</button>
+                            </div>
+                        </form>
+                    </td>
+                    <!-- Thành tiền -->
+                    <td class="text-end fw-bold text-dark">{{ "{:,.0f}".format(item.item_total).replace(',', '.') }} đ</td>
+                    <!-- Nút Xoá -->
+                    <td class="text-end">
+                        <form action="{{ url_for('remove_from_cart', book_id=item.book.id) }}" method="POST" class="m-0">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="submit" class="btn btn-link text-danger text-decoration-none p-0">
+                                <i class="fas fa-times me-1"></i> Xoá
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Tổng tiền -->
+    <div class="d-flex justify-content-end mb-4 me-3">
+        <span class="text-secondary me-4">Tổng cộng</span>
+        <h4 class="fw-bold text-orange mb-0" style="color: #ea580c;">{{ "{:,.0f}".format(total_amount).replace(',', '.') }} đ</h4>
+    </div>
+
+    <!-- Nút điều hướng cuối trang -->
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <a href="{{ url_for('books') }}" class="btn btn-outline-primary py-2 px-4 rounded-3">← Tiếp tục mua sách</a>
+        </div>
+        <div class="d-flex gap-3">
+            <form action="{{ url_for('clear_cart') }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xoá toàn bộ giỏ hàng?');" class="m-0">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <button type="submit" class="btn btn-outline-danger py-2 px-4 rounded-3">Xoá giỏ hàng</button>
+            </form>
+            <!-- Nút Đặt hàng sẽ liên kết sang trang checkout sau này -->
+            <a href="{{ url_for('checkout') }}" class="btn btn-primary py-2 px-5 rounded-3 fw-medium">Đặt hàng →</a>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản trị - Nhà sách Sông Hương</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #ffffff; }
+        .sidebar { min-height: 100vh; background-color: #263238; color: #b0bec5; }
+        .sidebar .nav-link { color: #b0bec5; font-weight: 500; padding: 10px 15px; margin-bottom: 5px; border-radius: 6px; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { background-color: #37474f; color: #ffffff; }
+        .badge-orange { background-color: #ea580c; color: white; }
+        .content-area { padding: 30px; background-color: #ffffff; }
+    </style>
+</head>
+<body>
+
+<div class="d-flex w-100" style="min-height: 100vh;">
+    <!-- Sidebar Trái -->
+    <div class="sidebar p-3 d-flex flex-column" style="width: 250px;">
+        <h5 class="text-white fw-bold mb-0">Quản trị</h5>
+        <small class="text-gray mb-4 d-block">Nhà sách Sông Hương</small>
+        
+        <ul class="nav flex-column gap-1 flex-grow-1">
+            <li class="nav-item">
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                    <i class="fas fa-th-large me-2"></i> Tổng quan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('admin_books') }}" class="nav-link {% if request.endpoint == 'admin_books' %}active{% endif %}">
+                    <i class="fas fa-book me-2"></i> Sách
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('admin_categories') }}" class="nav-link {% if request.endpoint == 'admin_categories' %}active{% endif %}">
+                    <i class="fas fa-tags me-2"></i> Danh mục
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('admin_orders') }}" class="nav-link d-flex justify-content-between align-items-center {% if request.endpoint == 'admin_orders' %}active{% endif %}">
+                    <span><i class="fas fa-file-invoice-dollar me-2"></i> Đơn hàng</span>
+                    {% if pending_count %}
+                    <span class="badge badge-orange rounded-pill">{{ pending_count }}</span>
+                    {% endif %}
+                </a>
+            </li>
+        </ul>
+        
+        <div class="mt-auto">
+            <a href="{{ url_for('books') }}" class="nav-link text-muted">
+                <i class="fas fa-arrow-left me-2"></i> Trang bán hàng
+            </a>
+        </div>
+    </div>
+    
+    <!-- Nội dung Phải -->
+    <div class="flex-grow-1 content-area">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'message' else category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block admin_content %}{% endblock %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
